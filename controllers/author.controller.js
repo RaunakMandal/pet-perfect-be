@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const Author = require("../models/author.model");
 const jwt = require("jsonwebtoken");
+const Book = require("../models/book.model");
 
 exports.signup = async (req, res) => {
   // Validate request
@@ -90,6 +91,7 @@ exports.signin = async (req, res) => {
   }
 };
 
+// Custom Middleware to check if user is signed in
 exports.isSignedIn = async (req, res, next) => {
   try {
     const token = req.headers.authorization;
@@ -100,5 +102,37 @@ exports.isSignedIn = async (req, res, next) => {
     return res
       .status(401)
       .json({ error: "Not authorized to access this resource" });
+  }
+};
+
+// Custom Methods for given doc
+exports.getAllAuthors = async (req, res) => {
+  try {
+    await Author.findAll({
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    }).then((data) => {
+      const authors = data.map(async (author) => {
+        return {
+          id: author.id,
+          name: author.name,
+          email: author.email,
+          phone_no: author.phone_no,
+          books_count: await Book.count({
+            where: {
+              author_id: author.id,
+            },
+          }),
+        };
+      });
+
+      // Wait for all promises to resolve and return the result
+      Promise.allSettled(authors).then((authors) => {
+        return res.status(200).json(authors);
+      });
+    });
+  } catch (error) {
+    return res.status(500).json(error);
   }
 };

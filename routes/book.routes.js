@@ -1,10 +1,9 @@
 const express = require("express");
 const { isSignedIn } = require("../controllers/author.controller");
+const { addBook } = require("../controllers/book.controller");
 const router = express.Router();
 
-router.get("/", isSignedIn, (req, res) => {
-  res.send("Hello World");
-});
+router.post("/add", isSignedIn, addBook);
 
 // Export the router
 module.exports = router;
