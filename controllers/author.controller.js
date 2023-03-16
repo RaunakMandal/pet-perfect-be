@@ -80,7 +80,6 @@ exports.signin = async (req, res) => {
         });
       })
       .catch((err) => {
-        console.log(err);
         return res.status(500).send({
           message: "Error retrieving User with email=" + email,
         });
@@ -186,10 +185,8 @@ exports.getAuthor = async (req, res) => {
 };
 
 exports.getMe = async (req, res) => {
-  console.log("refwfewfdwfewfwq", req.author);
   try {
     const id = req.author.id;
-    console.log("id", id);
     await Author.findByPk(id, {
       attributes: {
         exclude: ["password", "createdAt", "updatedAt"],
