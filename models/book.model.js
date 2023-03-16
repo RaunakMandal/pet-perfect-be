@@ -1,5 +1,5 @@
 const sequelize = require("../db/db.config.js");
-const { DataTypes } = require("sequelize");
+const { DataTypes, JSON } = require("sequelize");
 const Author = require("./author.model.js");
 
 // Define the User model
@@ -20,7 +20,13 @@ const Book = sequelize.define(
     },
     likes: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
+      defaultValue: [],
+      allowNull: false,
+    },
+    likes_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false,
     },
     author_id: {
       type: DataTypes.STRING,

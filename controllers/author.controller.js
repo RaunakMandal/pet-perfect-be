@@ -98,7 +98,7 @@ exports.isSignedIn = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     req.author = await Author.findByPk(decoded.id, {
       attributes: {
-        exclude: ["password", "createdAt", "updatedAt"],
+        exclude: ["password", "createdAt", "updatedAt", "books"],
       },
     });
     if (!req.author) {

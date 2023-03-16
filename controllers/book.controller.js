@@ -1,5 +1,4 @@
 const Book = require("../models/book.model.js");
-// const Author = require("../models/author.model.js");
 
 // Create and Save a new Book
 exports.addBook = async (req, res) => {
@@ -15,7 +14,6 @@ exports.addBook = async (req, res) => {
     const book = {
       title: req.body.title,
       author_id: req.author.id,
-      likes: [],
     };
 
     // Save Book in the database
@@ -43,7 +41,7 @@ exports.getAllBooks = async (req, res) => {
     await Book.findAll({
       offset: (page - 1) * per_page || 0,
       limit: per_page || 10,
-      order: order ? [["likes", order]] : [],
+      order: order ? [["likes_count", order]] : [],
     })
       .then((data) => {
         return res.status(200).json({
@@ -61,43 +59,54 @@ exports.getAllBooks = async (req, res) => {
   }
 };
 
+// Like a book with the specified id in the request
 exports.likeBook = async (req, res) => {
   try {
     const { id } = req.params;
     const author_id = req.author.id;
-    await Book.findOne({ where: { id: id } })
-      .then((data) => {
-        if (data) {
-          if (data.likes.includes(author_id)) {
-            return res.status(400).json({
-              message: "You have already liked this book",
-            });
-          } else {
-            // TODO: have to fix this
-            data.likes.push(author_id);
-            console.log(data.likes);
-            data.update({ likes: data.likes });
-            console.log(data);
-            return res.status(200).json({
-              message: "Book liked successfully",
-            });
-          }
-        } else {
-          return res.status(404).json({
-            message: "Book not found",
+
+    // Check if book exists in the database
+    await Book.findOne({ where: { id: id } }).then((data) => {
+      if (data) {
+        // Check if author has already liked the book
+        if (data.likes.includes(author_id)) {
+          return res.status(400).json({
+            message: "You have already liked this book",
           });
+        } else {
+          // Update the book likes and likes_count
+          data
+            .update(
+              {
+                likes: [...data.likes, author_id],
+                likes_count: data.likes_count + 1,
+              },
+              { where: { id: id } }
+            )
+            .then((liked) => {
+              return res.status(200).json({
+                message: "Book liked successfully",
+              });
+            })
+            .catch((err) => {
+              return res.status(500).send({
+                message:
+                  err.message || "Some error occurred while liking the book.",
+              });
+            });
         }
-      })
-      .catch((err) => {
-        res.status(500).send({
-          message: err.message || "Some error occurred while liking the book.",
+      } else {
+        return res.status(404).json({
+          message: "Book not found",
         });
-      });
+      }
+    });
   } catch (error) {
     return res.status(400).json(error);
   }
 };
 
+// Unlike a book with the specified id in the request
 exports.unlikeBook = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,11 +115,27 @@ exports.unlikeBook = async (req, res) => {
       .then((data) => {
         if (data) {
           if (data.likes.includes(author_id)) {
+            // Update the book likes by removing the author_id and decrement likes_count
             data.likes = data.likes.filter((like) => like !== author_id);
-            data.save();
-            return res.status(200).json({
-              message: "Book unliked successfully",
-            });
+            data
+              .update(
+                {
+                  likes: data.likes,
+                  likes_count: data.likes_count - 1,
+                },
+                { where: { id: id } }
+              )
+              .then((unliked) => {
+                return res.status(200).json({
+                  message: "Book unliked successfully",
+                });
+              })
+              .catch((err) => {
+                return res.status(500).send({
+                  message:
+                    err.message || "Some error occurred while liking the book.",
+                });
+              });
           } else {
             return res.status(400).json({
               message: "You have not liked this book",
