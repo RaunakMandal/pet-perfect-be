@@ -6,7 +6,6 @@ const Book = require("../models/book.model");
 exports.signup = async (req, res) => {
   // Validate request
   try {
-    console.log(req.body);
     if (
       !req?.body?.name ||
       !req?.body?.email ||
@@ -35,7 +34,7 @@ exports.signup = async (req, res) => {
         });
       })
       .catch((err) => {
-        res.status(500).send({
+        return res.status(500).send({
           message:
             err.message || "Some error occurred while creating the User.",
         });
