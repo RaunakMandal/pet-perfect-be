@@ -2,6 +2,14 @@ const request = require("supertest");
 const app = require("../app");
 const { faker } = require("@faker-js/faker");
 
+let server;
+
+beforeAll((done) => {
+  server = app.listen(process.env.APP_PORT, () => {
+    console.log(`Author Server is running on port ${process.env.APP_PORT}`);
+    done();
+  });
+});
 // Testing the signup route - but only for once
 // describe("POST /api/authors/signup", () => {
 //   it("should return 201 status code for each case", async () => {
@@ -75,4 +83,8 @@ describe("GET /api/authors/me", () => {
     expect(res.body).toHaveProperty("email", "raunak@test.com");
     expect(res.body).toHaveProperty("phone_no", "5432543");
   });
+});
+
+afterAll(async () => {
+  await server.close();
 });

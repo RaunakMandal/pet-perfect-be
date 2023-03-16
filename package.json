@@ -4,8 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "test": "jest --testTimeout=5000 --testMatch '**/*.tests.js'"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest --testTimeout=5000 --testMatch '**/*.tests.js' --detectOpenHandles --collect-coverage"
   },
   "keywords": [],
   "author": "",
