@@ -96,7 +96,14 @@ exports.isSignedIn = async (req, res, next) => {
   try {
     const token = req.headers.authorization;
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    req.author = await Author.findByPk(decoded.id);
+    req.author = await Author.findByPk(decoded.id, {
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    });
+    if (!req.author) {
+      throw new Error();
+    }
     next();
   } catch (error) {
     return res
@@ -129,8 +136,83 @@ exports.getAllAuthors = async (req, res) => {
 
       // Wait for all promises to resolve and return the result
       Promise.allSettled(authors).then((authors) => {
-        return res.status(200).json(authors);
+        const response = authors.map((author) => author.value);
+        return res.status(200).json(response);
       });
+    });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
+
+const getBooks = async (id) => {
+  return await Book.findAll({
+    where: {
+      author_id: id,
+    },
+    attributes: {
+      exclude: ["author_id", "createdAt", "updatedAt"],
+    },
+  });
+};
+
+exports.getAuthor = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    await Author.findByPk(id, {
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    }).then(async (data) => {
+      if (!data) {
+        return res.status(404).send({
+          message: "Author Not found.",
+        });
+      }
+
+      const author = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone_no: data.phone_no,
+        books: await getBooks(data.id),
+      };
+
+      return res.status(200).json(author);
+    });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
+
+exports.getMe = async (req, res) => {
+  console.log("refwfewfdwfewfwq", req.author);
+  try {
+    const id = req.author.id;
+    console.log("id", id);
+    await Author.findByPk(id, {
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    }).then(async (data) => {
+      if (!data) {
+        return res.status(404).send({
+          message: "Author Not found.",
+          req: req,
+          fuck: "dsa",
+        });
+      }
+
+      const author = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone_no: data.phone_no,
+        books: await getBooks(data.id),
+      };
+
+      return res.status(200).json(author);
     });
   } catch (error) {
     return res.status(500).json(error);
