@@ -1,9 +1,7 @@
 ## Backend Assignment for Intern at Pet Perfect
 This repo cotains all the necessary links and commands to run the app on your local device as it is not deployed on any cloud platform.
 
-### Notion Doc Link
-[```https://raunakmandal.notion.site/Documentation-for-Pet-Perfect-Backend-Assessment-7d98f8b7198f4f1aa855b70d9cef136a```](https://raunakmandal.notion.site/Documentation-for-Pet-Perfect-Backend-Assessment-7d98f8b7198f4f1aa855b70d9cef136a)
-
+##  [Notion Doc Link](https://raunakmandal.notion.site/Documentation-for-Pet-Perfect-Backend-Assessment-7d98f8b7198f4f1aa855b70d9cef136a)
 ### Run the App on Local Machine
 1. First, clone/download the repo and open the `root` directory.
 2. Now create a file called `.env` and put the poper values for these fields
