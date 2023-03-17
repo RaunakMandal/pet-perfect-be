@@ -196,7 +196,6 @@ exports.getMe = async (req, res) => {
         return res.status(404).send({
           message: "Author Not found.",
           req: req,
-          fuck: "dsa",
         });
       }
 
